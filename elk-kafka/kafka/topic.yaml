@@ -1,0 +1,12 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: your-logs-topic
+  namespace: elk-kafka
+spec:
+  config:
+    message.format.version: 2.4-IV1
+    segment.bytes: "741824"
+  partitions: 2
+  replicas: 2
+  topicName: your-logs-topic

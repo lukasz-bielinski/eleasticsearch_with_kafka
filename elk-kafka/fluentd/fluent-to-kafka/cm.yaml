@@ -1,0 +1,23 @@
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: fluent
+#   namespace: elk-kafka
+# data:
+#   fluent_conf: |
+#     @include kubernetes.conf
+#
+#
+#       @type kafka2
+#
+#       brokers               cluster-1-kafka-brokers:9092
+#
+#       topic_key             your-logs-topic
+#       default_topic         your-logs-topic
+#       output_data_type      json
+#       output_include_tag    true
+#       output_include_time   true
+#       get_kafka_client_log  false
+#
+#       required_acks         1
+#       compression_codec     gzip

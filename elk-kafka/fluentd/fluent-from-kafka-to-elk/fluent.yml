@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fluentd-kafka-to-elk
+  namespace: elk-kafka
+  labels:
+    k8s-app: fluentd-logging
+    version: v1
+spec:
+  selector:
+    matchLabels:
+      k8s-app: fluentd-logging
+      version: v1
+  template:
+    metadata:
+      labels:
+        k8s-app: fluentd-logging
+        version: v1
+    spec:
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: fluentd
+        image: lukaszbielinski/fluent-kafka-to-elk:0.6
+        imagePullPolicy: Always
+        env:
+          - name:  FLUENT_ELASTICSEARCH_HOST
+            value: "elasticsearch-sample-es-http"
+          - name:  FLUENT_ELASTICSEARCH_PORT
+            value: "9200"
+          - name: FLUENT_ELASTICSEARCH_SCHEME
+            value: "https"
+          # Option to configure elasticsearch plugin with self signed certs
+          # ================================================================
+          - name: FLUENT_ELASTICSEARCH_SSL_VERIFY
+            value: "false"
+          # Option to configure elasticsearch plugin with tls
+          # ================================================================
+          - name: FLUENT_ELASTICSEARCH_SSL_VERSION
+            value: "TLSv1_2"
+          # X-Pack Authentication
+          # =====================
+          - name: FLUENT_ELASTICSEARCH_USER
+            value: "elastic"
+          - name: FLUENT_ELASTICSEARCH_PASSWORD
+            value: "bx6vtbzml8zpd8p6zj7lhdv2"
+          - name: FLUENT_KAFKA_HOST
+            value: "cluster-1-kafka-brokers:9092"
+          - name: FLUENT_KAFKA_TOPIC
+            value: "your-logs-topic"
+          # Logz.io Authentication
+          # ======================
+          # - name: LOGZIO_TOKEN
+          #   value: "ThisIsASuperLongToken"
+          # - name: LOGZIO_LOGTYPE
+          #   value: "kubernetes"
+        # resources:
+        #   limits:
+        #     memory: 200Mi
+        #   requests:
+        #     cpu: 100m
+        #     memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
